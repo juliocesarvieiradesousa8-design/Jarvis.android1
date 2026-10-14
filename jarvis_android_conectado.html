@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06111f">
+<title>JARVIS — Protótipo</title>
+<style>
+:root{--cyan:#57eaff;--blue:#168bff;--bg:#050b14;--panel:#0b1b2b;--muted:#9bb8ca}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% 30%,#102e4a 0%,#071321 42%,#03070d 100%);color:#e8faff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{width:min(760px,100%);margin:auto;padding:22px 16px 34px}
+header{text-align:center;letter-spacing:.22em;font-size:12px;color:var(--cyan)}
+h1{text-align:center;margin:7px 0 2px;font-size:clamp(24px,6vw,36px);letter-spacing:.12em}
+.subtitle{text-align:center;color:var(--muted);font-size:13px;margin-bottom:20px}
+.stage{position:relative;overflow:hidden;border:1px solid #1a6a8c88;border-radius:24px;background:linear-gradient(180deg,#061827cc,#06101bcc);min-height:310px;display:grid;place-items:center;box-shadow:0 0 35px #007fb522,inset 0 0 35px #00baff0b}
+.stage:before,.stage:after{content:"";position:absolute;border:1px solid #29c9ff44;border-radius:50%;width:240px;height:240px;animation:spin 18s linear infinite}
+.stage:after{width:280px;height:280px;border-style:dashed;animation-direction:reverse;animation-duration:32s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.robot{position:relative;width:190px;height:220px;z-index:1;filter:drop-shadow(0 0 14px #1ccfff55);animation:float 3.5s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-7px)}}
+.head{position:absolute;left:25px;top:22px;width:140px;height:150px;border:2px solid var(--cyan);border-radius:48% 48% 42% 42%;background:linear-gradient(135deg,#174f70,#081c32 65%,#0c3048);box-shadow:inset 0 0 24px #26dfff33,0 0 20px #009dff33}
+.ear{position:absolute;top:75px;width:18px;height:45px;border:2px solid var(--cyan);background:#0a3049;border-radius:8px;box-shadow:0 0 12px #19cfff66}
+.ear.left{left:9px}.ear.right{right:9px}
+.brow{position:absolute;top:48px;width:43px;height:4px;background:#59edff;border-radius:5px;box-shadow:0 0 8px #59edff}
+.brow.left{left:18px;transform:rotate(-7deg)}.brow.right{right:18px;transform:rotate(7deg)}
+.eye{position:absolute;top:62px;width:35px;height:15px;background:#53edff;border-radius:50%;box-shadow:0 0 10px #53edff,0 0 23px #168bff;animation:blink 5s infinite}
+.eye.left{left:20px}.eye.right{right:20px}
+@keyframes blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.12)}}
+.nose{position:absolute;left:67px;top:81px;width:7px;height:18px;border-left:2px solid #42dfff;border-bottom:2px solid #42dfff;transform:skew(-12deg)}
+.cheek{position:absolute;top:91px;width:22px;height:5px;border-top:2px solid #26bfff;opacity:.8}.cheek.left{left:10px}.cheek.right{right:10px}
+.mouth{position:absolute;left:43px;top:112px;width:54px;height:17px;border:2px solid #52eaff;border-radius:4px 4px 12px 12px;background:repeating-linear-gradient(90deg,#42dfff 0 3px,transparent 3px 7px);box-shadow:0 0 10px #00bfff44;transform-origin:center;transition:height .08s}
+.robot.speaking .mouth{height:27px;animation:talk .17s ease-in-out infinite alternate}
+@keyframes talk{from{transform:scaleY(.45)}to{transform:scaleY(1.1)}}
+.neck{position:absolute;left:75px;top:169px;width:40px;height:18px;border:2px solid #37dfff;border-top:0;background:#0b2940}
+.shoulders{position:absolute;left:20px;top:184px;width:150px;height:26px;border:2px solid #2bcfff;border-radius:50% 50% 10px 10px;background:linear-gradient(90deg,#0b304a,#174e68,#0b304a)}
+.hud{position:absolute;z-index:2;color:#62eaff;font:10px ui-monospace,monospace;letter-spacing:.08em;opacity:.8}
+.hud.a{left:12px;top:16px}.hud.b{right:12px;bottom:16px;text-align:right}
+.status{display:flex;justify-content:center;align-items:center;gap:8px;color:#aeefff;font-size:12px;margin:14px 0}
+.dot{width:7px;height:7px;border-radius:50%;background:#4cffb0;box-shadow:0 0 9px #4cffb0}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+button{border:1px solid #258eb4;background:linear-gradient(180deg,#0d3550,#092136);color:#e9fbff;border-radius:14px;padding:14px 10px;font-size:14px;font-weight:650;cursor:pointer;min-height:50px}
+button:active{transform:scale(.985)}button.primary{background:linear-gradient(135deg,#087fa8,#1454a4);border-color:#57eaff;box-shadow:0 0 18px #00bfff22}
+button:disabled{opacity:.45}
+.inputrow{display:flex;gap:8px;margin-top:10px}
+input{flex:1;min-width:0;background:#061522;border:1px solid #24536a;border-radius:12px;padding:13px;color:white;font-size:15px}
+.log{margin-top:14px;border:1px solid #19445b;background:#061421cc;border-radius:16px;padding:14px}
+.log h2{font-size:12px;color:var(--cyan);letter-spacing:.12em;margin:0 0 8px}
+#reply{font-size:14px;line-height:1.5;white-space:pre-wrap;color:#e3f8ff;min-height:40px}
+.note{font-size:12px;line-height:1.55;color:#9bb8ca;margin:14px 2px 0}
+.tag{display:inline-block;border:1px solid #1c708d;color:#6deaff;border-radius:99px;padding:3px 8px;font-size:10px;margin:2px}
+@media(max-width:380px){.stage{min-height:290px}.controls{grid-template-columns:1fr}.robot{transform:scale(.9)}}
+</style>
+</head>
+<body>
+<main>
+<header>SISTEMA DE ASSISTÊNCIA • PROTÓTIPO LOCAL</header>
+<h1>J.A.R.V.I.S.</h1>
+<div class="subtitle">Interface holográfica experimental</div>
+<section class="stage" aria-label="Avatar robótico animado">
+  <div class="hud a">SYS: ONLINE<br>VOICE: READY<br>AI LINK: <span id="aiLink">A VERIFICAR</span></div>
+  <div class="robot" id="robot" aria-label="Cabeça robótica animada">
+    <div class="ear left"></div><div class="ear right"></div>
+    <div class="head">
+      <div class="brow left"></div><div class="brow right"></div>
+      <div class="eye left"></div><div class="eye right"></div>
+      <div class="nose"></div><div class="cheek left"></div><div class="cheek right"></div><div class="mouth"></div>
+    </div>
+    <div class="neck"></div><div class="shoulders"></div>
+  </div>
+  <div class="hud b">HOLO DISPLAY v0.1<br>ANDROID READY<br>VOICE ENGINE: BROWSER</div>
+</section>
+<div class="status"><span class="dot"></span><span id="status">Sistema visual ativo</span></div>
+<div class="controls">
+  <button class="primary" id="listen">🎙️ Falar com Jarvis</button>
+  <button id="speak">🔊 Testar voz</button>
+  <button id="hello">⚡ Iniciar sistema</button>
+  <button id="stop">■ Parar voz</button>
+</div>
+<div class="inputrow">
+  <input id="typed" placeholder="Digite um comando..." autocomplete="off">
+  <button id="send">Enviar</button>
+</div>
+<section class="log">
+  <h2>RESPOSTA DO SISTEMA</h2>
+  <div id="reply">Aguardando comando, senhor. Toque em “Falar com Jarvis” ou digite uma mensagem.</div>
+</section>
+<div class="note">
+  <span class="tag">FUNCIONA</span> Avatar e animações visuais, comandos simples, síntese de voz do navegador e reconhecimento de fala quando compatível.<br>
+  <span class="tag">AINDA NÃO INTEGRADO</span> As mensagens são enviadas ao servidor /api/chat. A ligação real depende de o servidor estar em execução e de a chave da API estar configurada. A boca anima durante a voz, mas não sincroniza cada fonema.
+</div>
+</main>
+<script>
+const robot=document.getElementById('robot'),statusEl=document.getElementById('status'),reply=document.getElementById('reply');
+const listenBtn=document.getElementById('listen'),typed=document.getElementById('typed');
+function setStatus(s){statusEl.textContent=s}
+function say(text){
+  reply.textContent=text;
+  if(!('speechSynthesis' in window)){setStatus('Voz não suportada neste navegador');return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang='pt-BR';u.rate=0.96;u.pitch=0.82;
+  u.onstart=()=>{robot.classList.add('speaking');setStatus('Jarvis falando…')};
+  u.onend=()=>{robot.classList.remove('speaking');setStatus('Sistema visual ativo')};
+  u.onerror=()=>{robot.classList.remove('speaking');setStatus('Não foi possível reproduzir a voz')};
+  speechSynthesis.speak(u);
+}
+async function respond(raw){
+  const q=raw.trim();
+  if(!q) return;
+  reply.textContent='A consultar a inteligência artificial…';
+  setStatus('A contactar o servidor…');
+  try{
+    const response=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:q})
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data.error||`Erro HTTP ${response.status}`);
+    if(typeof data.reply!=='string'||!data.reply.trim()) throw new Error('O servidor não devolveu uma resposta válida.');
+    say(data.reply);
+  }catch(error){
+    reply.textContent='Não consegui contactar a IA. '+(error.message||'Verifique se o servidor está publicado e configurado.');
+    setStatus('Falha na ligação à IA');
+  }
+}
+
+document.getElementById('hello').addEventListener('click',()=>say('J.A.R.V.I.S. online, senhor. Interface holográfica inicializada. Aguardando suas instruções.'));
+document.getElementById('speak').addEventListener('click',()=>say('Teste de áudio concluído. Se está ouvindo minha voz, a saída de áudio funciona neste navegador.'));
+document.getElementById('stop').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();robot.classList.remove('speaking');setStatus('Voz parada')});
+document.getElementById('send').addEventListener('click',()=>{const q=typed.value.trim();if(q){typed.value='';respond(q)}});
+typed.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('send').click()});
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){listenBtn.addEventListener('click',()=>{setStatus('Reconhecimento de fala indisponível');reply.textContent='Este navegador não oferece reconhecimento de fala. Use a digitação ou abra o arquivo no Google Chrome atualizado e teste novamente.'})}
+else{
+ const recognition=new SR();recognition.lang='pt-BR';recognition.interimResults=false;recognition.maxAlternatives=1;
+ recognition.onstart=()=>{setStatus('Ouvindo… fale agora');listenBtn.textContent='🎙️ Ouvindo…'};
+ recognition.onresult=e=>{const q=e.results[0][0].transcript;reply.textContent='Você: '+q;respond(q)};
+ recognition.onerror=e=>{setStatus('Microfone: '+e.error);reply.textContent='Não consegui reconhecer a fala. Confira a permissão do microfone e tente novamente.';listenBtn.textContent='🎙️ Falar com Jarvis'};
+ recognition.onend=()=>{listenBtn.textContent='🎙️ Falar com Jarvis';if(statusEl.textContent==='Ouvindo… fale agora')setStatus('Sistema visual ativo')};
+ listenBtn.addEventListener('click',()=>{try{recognition.start()}catch(e){setStatus('Aguarde um instante e tente novamente')}})
+}
+
+// Verifica se o HTML está a ser servido pelo servidor Jarvis e se a API está acessível.
+(async()=>{
+  const badge=document.getElementById('aiLink');
+  try{
+    const r=await fetch('/api/health');
+    const d=await r.json();
+    if(r.ok && d.ok){
+      badge.textContent='SERVIDOR OK';
+      setStatus('Servidor conectado; IA pronta para teste');
+    }else{
+      badge.textContent='INDISPONÍVEL';
+      setStatus('Servidor não confirmado');
+    }
+  }catch(_){
+    badge.textContent='OFFLINE';
+    setStatus('Abra o Jarvis pelo endereço do servidor, não como ficheiro local');
+  }
+})();
+
+</script>
+</body>
+</html>
